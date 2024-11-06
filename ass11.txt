@@ -1,0 +1,70 @@
+Assignment Content
+Calculate the Total Salary by Department
+
+javascript
+Copy code
+var mapFunction = function() { 
+    emit(this.department, this.salary); 
+}; 
+
+var reduceFunction = function(key, values) { 
+    return Array.sum(values); 
+}; 
+
+db.employees.mapReduce( 
+    mapFunction, 
+    reduceFunction, 
+    { 
+        out: "total_salary_by_department" 
+    } 
+);
+Query example with a filter:
+
+javascript
+Copy code
+query: { department: "IT" }
+Count the Number of Employees by Skill
+
+javascript
+Copy code
+var mapFunction = function() { 
+    for (var i = 0; i < this.skills.length; i++) { 
+        emit(this.skills[i].name, 1); 
+    } 
+}; 
+
+var reduceFunction = function(key, values) { 
+    return Array.sum(values); 
+}; 
+
+db.employees.mapReduce( 
+    mapFunction, 
+    reduceFunction, 
+    { 
+        out: "employee_skill_count" 
+    } 
+);
+Count the Number of Employees by Department
+
+javascript
+Copy code
+var mapFunction = function() { 
+    emit(this.department, 1); 
+}; 
+
+var reduceFunction = function(key, values) { 
+    return Array.sum(values); // Sum the counts 
+}; 
+
+db.employees.mapReduce( 
+    mapFunction, 
+    reduceFunction, 
+    { 
+        out: "emp_count" 
+    } 
+);
+Query example with a filter for employees over a certain age:
+
+javascript
+Copy code
+query: { age: { $gt: 30 } }

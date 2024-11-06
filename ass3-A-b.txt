@@ -1,0 +1,142 @@
+Employee Schema
+1. Find Employee details and Department details using NATURAL JOIN.
+
+SELECT * 
+FROM Employee NATURAL JOIN Dept;
+2. Find emp_fname, Emp_position, location, Emp_JoinDate who have the same Dept_id.
+
+SELECT emp_fname, Emp_position, location, Emp_JoinDate 
+FROM Employee 
+JOIN Dept ON Employee.Dept_id = Dept.Dept_id;
+3. Find Employee details, Proj_id, and Project_cost where Project location is not 'Hyderabad'.
+
+SELECT Employee.*, Project.Proj_id, Project.Proj_cost 
+FROM Employee 
+JOIN Project ON Employee.Dept_id = Project.Dept_id 
+WHERE Project.Proj_Location <> 'Hyderabad';
+4. Find Department name, employee name, and position for projects in the year 2020.
+
+SELECT Dept.Dept_name, Employee.Emp_fname, Employee.Emp_Position 
+FROM Employee 
+JOIN Dept ON Employee.Dept_id = Dept.Dept_id 
+JOIN Project ON Dept.Dept_id = Project.Dept_id 
+WHERE Project.Proj_year = 2020;
+5. Display Emp_position and D_name for projects with cost greater than 30000.
+
+SELECT Employee.Emp_Position, Dept.Dept_name 
+FROM Employee 
+JOIN Dept ON Employee.Dept_id = Dept.Dept_id 
+JOIN Project ON Dept.Dept_id = Project.Dept_id 
+WHERE Project.Proj_cost > 30000;
+6. Find all project names that started in the year 2015.
+
+SELECT Proj_Name 
+FROM Project 
+WHERE Proj_year = 2015;
+7. List Dept_name with no_of_emp = 10.
+
+SELECT Dept.Dept_name 
+FROM Dept 
+JOIN Employee ON Dept.Dept_id = Employee.Dept_id 
+GROUP BY Dept.Dept_name 
+HAVING COUNT(Employee.Emp_id) = 10;
+8. Display the total number of employees who joined any project before 2009.
+
+SELECT COUNT(DISTINCT Employee.Emp_id) AS Total_Employees 
+FROM Employee 
+JOIN Project ON Employee.Dept_id = Project.Dept_id 
+WHERE Project.Proj_year < 2009;
+9. Create a view showing the Employee and Department details.
+
+CREATE VIEW EmpDeptView AS 
+SELECT Employee.*, Dept.Dept_name, Dept.location 
+FROM Employee 
+JOIN Dept ON Employee.Dept_id = Dept.Dept_id;
+10. Manipulate the view (Insert, Update, Delete, Drop).
+Insert: (Insertions depend on view constraints, so this is a general example)
+
+INSERT INTO EmpDeptView (Emp_id, Dept_id, Emp_fname, Emp_lname, Emp_Position, Emp_salary, Emp_JoinDate, Dept_name, location)
+VALUES (101, 1, 'John', 'Doe', 'Manager', 50000, '2010-05-10', 'Sales', 'New York');
+Update:
+
+UPDATE EmpDeptView 
+SET Emp_salary = Emp_salary * 1.1 
+WHERE Emp_Position = 'Manager';
+Delete:
+
+DELETE FROM EmpDeptView 
+WHERE Emp_id = 101;
+Drop View:
+
+DROP VIEW EmpDeptView;
+
+
+Student Schema
+1. Find Student details and Placement details using NATURAL JOIN.
+
+SELECT * 
+FROM Student NATURAL JOIN PlacementDrive;
+2. Find all student details with company_name who attended the same drive.
+
+SELECT Student.*, PlacementDrive.Pcompany_name 
+FROM Student 
+JOIN PlacementDrive ON Student.Drive_id = PlacementDrive.Drive_id;
+3. List s_name and s_branch for students with a package of 5 LPA.
+
+SELECT s_name, s_branch 
+FROM Student 
+JOIN PlacementDrive ON Student.Drive_id = PlacementDrive.Drive_id 
+WHERE PlacementDrive.package = 500000;
+4. List student names and company_name where T_fee > 20000.
+
+SELECT s_name, Training.Tcompany_name 
+FROM Student 
+JOIN Training ON Student.T_id = Training.T_id 
+WHERE Training.T_Fee > 20000;
+5. Display all training details attended by "Shantanu" in the year 2011.
+
+SELECT Training.* 
+FROM Student 
+JOIN Training ON Student.T_id = Training.T_id 
+WHERE s_name = 'Shantanu' AND YEAR(T_date) = 2011;
+6. List the total number of companies that conducted training before 2015.
+
+SELECT COUNT(DISTINCT Tcompany_name) AS Total_Companies 
+FROM Training 
+WHERE YEAR(T_date) < 2015;
+7. List students with company_name as 'Microsoft' and location 'Thane'.
+
+SELECT s_name 
+FROM Student 
+JOIN PlacementDrive ON Student.Drive_id = PlacementDrive.Drive_id 
+WHERE PlacementDrive.Pcompany_name = 'Microsoft' AND PlacementDrive.location = 'Thane';
+8. Find students who joined 'Microsoft' training in 2015.
+
+SELECT s_name 
+FROM Student 
+JOIN Training ON Student.T_id = Training.T_id 
+WHERE Training.Tcompany_name = 'Microsoft' AND YEAR(T_date) = 2015;
+9. Create a view showing the Student and Training details.
+
+CREATE VIEW StudTrainView AS 
+SELECT Student.*, Training.Tcompany_name, Training.T_Fee, Training.T_date 
+FROM Student 
+JOIN Training ON Student.T_id = Training.T_id;
+10. Manipulate the view (Insert, Update, Delete, Drop).
+Insert:
+
+INSERT INTO StudTrainView (s_id, Drive_id, T_id, s_name, CGPA, s_branch, s_dob, Tcompany_name, T_Fee, T_date)
+VALUES (201, 3, 1, 'Alex', 8.5, 'Computer', '2000-02-15', 'Infosys', 25000, '2021-01-10');
+Update:
+
+UPDATE StudTrainView 
+SET CGPA = CGPA + 0.2 
+WHERE s_name = 'Alex';
+Delete:
+
+DELETE FROM StudTrainView 
+WHERE s_id = 201;
+Drop View:
+
+DROP VIEW StudTrainView;
+These queries cover natural joins, aggregate functions, and view manipulation as per your instructions.

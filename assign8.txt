@@ -1,0 +1,129 @@
+package database;
+
+import java.sql.*;
+import java.util.Scanner;
+
+class Database {
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://10.10.13.97/te31447_db", "te31447", "te31447");
+    }
+
+    private static void viewEmployees(Statement stmt) throws SQLException {
+        ResultSet rs = stmt.executeQuery("SELECT * FROM emp");
+        while (rs.next()) {
+            int eno = rs.getInt("id");
+            String enm = rs.getString("name").trim();
+            int age = rs.getInt("age");
+            System.out.println("Employee Id: " + eno + " Employee Name: " + enm + " Age: " + age);
+        }
+    }
+
+    private static void insertEmployee(Statement stmt, Scanner sc) throws SQLException {
+        System.out.println("Enter employee id: ");
+        int eno = sc.nextInt();
+        System.out.println("Enter employee Name: ");
+        String enm = sc.next();
+        System.out.println("Enter employee age: ");
+        int age = sc.nextInt();
+
+        String query = "INSERT INTO emp (id, name, age) VALUES (" + eno + ", '" + enm + "', " + age + ")";
+        try {
+            stmt.executeUpdate(query);
+            System.out.println("Record is inserted in the table successfully!");
+        } catch (SQLIntegrityConstraintViolationException e) {
+            System.out.println("Employee ID already exists.");
+        }
+    }
+
+    private static void deleteEmployee(Statement stmt, Scanner sc) throws SQLException {
+        System.out.println("Enter employee id to delete: ");
+        int deleteEno = sc.nextInt();
+        String query = "DELETE FROM emp WHERE id = " + deleteEno;
+        int rowsAffected = stmt.executeUpdate(query);
+        if (rowsAffected > 0) {
+            System.out.println("Record deleted from the table successfully!");
+        } else {
+            System.out.println("Employee ID does not exist in the table.");
+        }
+    }
+
+    private static void updateEmployee(Statement stmt, Scanner sc) throws SQLException {
+        System.out.println("Enter employee id to update: ");
+        int updateEno = sc.nextInt();
+        System.out.println("Which column do you want to update? (id/name/age)");
+        String col = sc.next();
+
+        String query = "";
+        if (col.equals("id")) {
+            System.out.println("Enter the new id: ");
+            int newId = sc.nextInt();
+            query = "UPDATE emp SET id = " + newId + " WHERE id = " + updateEno;
+        } else if (col.equals("name")) {
+            System.out.println("Enter the new name: ");
+            String newName = sc.next();
+            query = "UPDATE emp SET name = '" + newName + "' WHERE id = " + updateEno;
+        } else if (col.equals("age")) {
+            System.out.println("Enter the new age: ");
+            int newAge = sc.nextInt();
+            query = "UPDATE emp SET age = " + newAge + " WHERE id = " + updateEno;
+        } else {
+            System.out.println("Invalid column name.");
+            return;
+        }
+
+        int rowsAffected = stmt.executeUpdate(query);
+        if (rowsAffected > 0) {
+            System.out.println("Record updated successfully!");
+        } else {
+            System.out.println("Employee ID does not exist in the table.");
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            Scanner sc = new Scanner(System.in);
+            int choice;
+
+            do {
+                System.out.println("\nMenu:");
+                System.out.println("1. View Employees");
+                System.out.println("2. Insert Employee");
+                System.out.println("3. Delete Employee");
+                System.out.println("4. Update Employee");
+                System.out.println("5. Exit");
+                System.out.print("Enter your choice: ");
+                choice = sc.nextInt();
+
+                switch (choice) {
+                    case 1:
+                        viewEmployees(stmt);
+                        break;
+                    case 2:
+                        insertEmployee(stmt, sc);
+                        break;
+                    case 3:
+                        deleteEmployee(stmt, sc);
+                        break;
+                    case 4:
+                        updateEmployee(stmt, sc);
+                        break;
+                    case 5:
+                        System.out.println("Exiting...");
+                        break;
+                    default:
+                        System.out.println("Invalid choice, please try again.");
+                }
+            } while (choice != 5);
+
+            // Close resources
+            stmt.close();
+            con.close();
+            sc.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

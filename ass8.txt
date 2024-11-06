@@ -1,0 +1,171 @@
+package data;
+import java.sql.*;
+import java.util.Scanner;
+import static java.lang.System.exit;
+public class Crud{
+ public static void createData(){
+ final String url = "jdbc:mysql://10.10.13.97:3306/te31413_db";
+ final String uname = "te31413";
+ final String pass = "te31413";
+ Scanner sc = new Scanner(System.in);
+ System.out.print("\t\t\tEnter Roll number : ");
+ int id = sc.nextInt();
+ System.out.print("\t\t\tEnter name : ");
+ String name = sc.next();
+ System.out.print("\t\t\tEnter marks : ");
+ int marks = sc.nextInt();
+ String query="INSERT INTO Student (rollno, name,marks) values 
+('"+id+"','"+name+"','"+marks+"')";
+ Connection con;
+ try{
+ con=DriverManager.getConnection(url,uname,pass);
+ Statement stmt = con.createStatement();
+ int rows = stmt.executeUpdate(query);
+ if(rows==1) {
+ System.out.println("\t\t\t rows affected....");
+ }else {
+ System.out.println("\t\t\tSomething is Wrong.....!! ");
+ }
+ menu();
+ }catch (Exception e){
+ e.printStackTrace();
+ }
+ }
+ public static void readData(){
+ final String url = "jdbc:mysql://10.10.13.97:3306/te31413_db";
+ final String uname = "te31413";
+ final String pass = "te31413";
+ String query = "select * from Student";
+ Connection con;
+ try {
+ con = DriverManager.getConnection(url, uname, pass);
+ Statement st = con.createStatement();
+ ResultSet rs = st.executeQuery(query);
+ while(rs.next()) {
+ int id = rs.getInt("rollno");
+ String name = rs.getString("name");
+ int marks = rs.getInt("marks");
+ System.out.println("\t\t\tSudent ID : "+id+" Name -->> "+name+" Marks -->> 
+"+marks);
+ }
+ menu();
+ } catch (Exception e) {
+ e.printStackTrace();
+ }
+ }
+ public static void deleteData(){
+ final String url = "jdbc:mysql://10.10.13.97:3306/te31413_db";
+ final String uname = "te31413_db";
+ final String pass = "te31413";
+ System.out.print("\t\t\tEnter Roll number : ");
+ Scanner sc = new Scanner(System.in);
+ int id = sc.nextInt();
+ String query = "DELETE FROM Student where rollno ='"+id+"' ";
+ Connection con;
+ try{
+ con = DriverManager.getConnection(url,uname,pass);
+ Statement stmt = con.createStatement();
+ int rows = stmt.executeUpdate(query);
+ if(rows==1) {
+ System.out.println("\t\t\t rows affected....");
+ }else {
+ System.out.println("\t\t\t enter correct roll number.....!! ");
+ deleteData();
+ }
+ menu();
+ }catch (Exception e){
+ e.printStackTrace();
+ }
+ }
+ public static void updateData(){
+ final String url = "jdbc:mysql://10.10.13.97:3306/te31413_db";
+ final String uname = "te31413";
+ final String pass = "te31413";
+ String query = null;
+ Scanner sc = new Scanner(System.in);
+ System.out.println("\t\t\t1 - Roll no. Updates");
+ System.out.println("\t\t\t2 - Name Updates");
+ System.out.println("\t\t\t3 - Marks Updates");
+ System.out.print("\t\t Choose Option to Updates data -->> ");
+ int opt = sc.nextInt();
+ if(opt==1){
+ System.out.print("\n\t\t\tEnter name of : ");
+ String name = sc.next();
+ System.out.print("\t\t\tEnter Roll number : ");
+ int id = sc.nextInt();
+ query = "UPDATE Student SET rollno ='"+id+"' where name ='"+name+"' ";
+ }else if(opt==2){
+ System.out.print("\n\t\t\tEnter Roll number : ");
+ int id = sc.nextInt();
+ System.out.print("\t\t\tEnter Names to Updates : ");
+ String name = sc.next();
+ query = "UPDATE Student SET name ='"+name+"' where rollno ='"+id+"' ";
+ }
+ else if(opt==3){
+ System.out.print("\n\t\t\tEnter Roll number : ");
+ int id = sc.nextInt();
+ System.out.print("\t\t\tEnter marks to updates : ");
+ int marks=sc.nextInt()
+; query = "UPDATE Student SET marks ='"+marks+"' where rollno ='"+id+"' ";
+ }
+ else {
+ System.out.println("\n\t\t\tChoose correct option ......");
+ updateData();
+ }
+ Connection con;
+ try{
+ con = DriverManager.getConnection(url,uname,pass);
+ Statement stmt = con.createStatement();
+ int rows = stmt.executeUpdate(query);
+ if(rows==1) {
+ System.out.println("\t\t\t\t\t rows affected....");
+ }else {
+ System.out.println("\t\t\t enter correct data .....!! ");
+ updateData();
+ }
+ menu();
+ }catch (Exception e){
+ e.printStackTrace();
+ }
+ }
+ public static void menu() {
+ System.out.println("\n\n\t\t\t --------- CRUD OPERATION USING JAVA --------\n");
+ System.out.println("\t\t\t1 - Create Data ");
+ System.out.println("\t\t\t2 - Read Data ");
+ System.out.println("\t\t\t3 - Update Data ");
+ System.out.println("\t\t\t4 - Delete Data ");
+ System.out.println("\t\t\t5 - Exit");
+ System.out.print("\t\t Select Option ---->>> ");
+ Scanner sc = new Scanner(System.in);
+ int select= sc.nextInt();
+ switch (select) {
+ case 1 -> {
+ System.out.println("\n\n ------ Create Data Carefully ------\n");
+ createData();
+ }
+ case 2 -> {
+ System.out.println("\n\n---------- Data contains---------\n");
+ readData();
+ }
+ case 3 -> {
+ System.out.println("\n\n --------- Updates Data ---------\n");
+ updateData();
+ }
+ case 4 -> {
+ System.out.println("\n\n ---------- Delete Data ----------\n");
+ deleteData();
+ }
+ case 5 -> {
+ System.out.println("\t\t\t\t\t Exiting....\n \t\t\t\t\t ");
+ exit(0);
+ }
+ default -> {
+ System.out.println("Wrong Option...!");
+ menu();
+ }
+ }
+ }
+ public static void main(String[] args) {
+ menu();
+ }
+}

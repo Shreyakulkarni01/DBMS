@@ -1,0 +1,90 @@
+Task: Create and Manipulate Library and Audit Tables with Triggers in MySQL
+Create the Library Table
+
+sql
+Copy code
+CREATE TABLE Library(
+    bno INT(5),
+    bname VARCHAR(40),
+    author VARCHAR(20),
+    allowed_days INT(5)
+);
+Create the Library Audit Table
+
+sql
+Copy code
+CREATE TABLE Library_Audit(
+    bno INT(5),
+    bname VARCHAR(40),
+    author VARCHAR(20),
+    allowed_days INT(5),
+    action_type VARCHAR(10),  -- 'UPDATE' or 'DELETE'
+    action_time TIMESTAMP     -- Time of action
+);
+Insert Data into the Library Table
+
+sql
+Copy code
+INSERT INTO Library VALUES(1, 'Database System Concepts', 'aaa', 10);
+INSERT INTO Library VALUES(2, 'Operating Systems', 'bbb', 20);
+INSERT INTO Library VALUES(3, 'Computer Networks', 'ccc', 18);
+INSERT INTO Library VALUES(4, 'Theory of Computation', 'ddd', 24);
+View the Library Table
+
+sql
+Copy code
+SELECT * FROM Library;
+Create a Trigger for Before Update
+
+sql
+Copy code
+CREATE TRIGGER before_update_row
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit(bno, bname, author, allowed_days, action_type, action_time)
+    VALUES(OLD.bno, OLD.bname, OLD.author, OLD.allowed_days, 'UPDATE', CURRENT_TIMESTAMP);
+END //
+DELIMITER ;
+Update the Library Table
+
+sql
+Copy code
+UPDATE Library SET allowed_days = 15 WHERE bno = 1;
+UPDATE Library SET allowed_days = 12 WHERE bno = 2;
+View the Updated Library Table
+
+sql
+Copy code
+SELECT * FROM Library;
+View the Library Audit Table After Updates
+
+sql
+Copy code
+SELECT * FROM Library_Audit;
+Create a Trigger for After Delete
+
+sql
+Copy code
+CREATE TRIGGER after_delete_row
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit(bno, bname, author, allowed_days, action_type, action_time)
+    VALUES(OLD.bno, OLD.bname, OLD.author, OLD.allowed_days, 'DELETE', CURRENT_TIMESTAMP);
+END //
+Delete a Row from the Library Table
+
+sql
+Copy code
+DELETE FROM Library WHERE bno = 2;
+View the Library Table After Deletion
+
+sql
+Copy code
+SELECT * FROM Library;
+View the Library Audit Table After Deletion
+
+sql
+Copy code
+SELECT * FROM Library_Audit;

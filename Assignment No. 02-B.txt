@@ -1,0 +1,124 @@
+Assignment No. 02
+Table Creation
+Creating placementDrive Table
+
+sql
+Copy code
+create table placementDrive(
+    drive_id int,
+    pcompany_name varchar(20),
+    package int,
+    location varchar(20),
+    primary key(drive_id)
+);
+Creating Training Table
+
+sql
+Copy code
+create table Training(
+    t_id int,
+    tcompany_name varchar(20),
+    t_fee int,
+    t_year int,
+    primary key(t_id)
+);
+Creating Student Table
+
+sql
+Copy code
+create table Student(
+    s_id int,
+    drive_id int,
+    t_id int,
+    s_name varchar(20),
+    cgpa float,
+    s_branch varchar(10),
+    s_dob date,
+    primary key(s_id),
+    foreign key(drive_id) references placementDrive(drive_id),
+    foreign key(t_id) references Training(t_id) on delete cascade
+);
+Record Insertion
+Insert Records into placementDrive
+
+sql
+Copy code
+insert into placementDrive values(1, "Google", 2000000, "pune");
+insert into placementDrive values(2, "Microsoft", 4000000, "Banglore");
+insert into placementDrive values(3, "amazon", 2500000, "mumbai");
+insert into placementDrive values(4, "adobe", 3000000, "Hydrabad");
+insert into placementDrive values(5, "barclays", 1800000, "pune");
+Insert Records into Training
+
+sql
+Copy code
+insert into Training values(1, "hdfcBank", 20000, 2024);
+insert into Training values(2, "microsoft", 30000, 2023);
+insert into Training values(3, "flipkart", 22000, 2023);
+insert into Training values(4, "barclays", 27000, 2024);
+insert into Training values(5, "amdocs", 40000, 2022);
+Insert Records into Student
+
+sql
+Copy code
+insert into Student values(111, 1, 2, "shreya", 9.6, "computer", '2004-04-01');
+insert into Student values(222, 2, 3, "neha", 8.6, "it", '2004-05-06');
+insert into Student values(333, 3, 4, "siddhi", 9.7, "it", '2004-02-09');
+insert into Student values(444, 4, 5, "sakshi", 7.2, "computer", '2004-04-12');
+insert into Student values(555, 5, 1, "akshay", 8.3, "it", '2004-08-15');
+insert into Student values(666, 4, 2, "swarnim", 7.6, "computer", '2004-06-24');
+insert into Student values(777, 3, 3, "mohit", 6.7, "it", '2004-09-17');
+insert into Student values(888, 2, 1, "riya", 8.2, "computer", '2004-04-01');
+insert into Student values(999, 1, 4, "divya", 7.8, "computer", '2004-04-09');
+insert into Student values(101, 2, 5, "anushka", 9.3, "it", '2004-01-01');
+Queries
+Display all students with Computer or IT branch and names starting with 'a' or 's'
+
+sql
+Copy code
+select * from Student where s_branch IN('computer','it') and (s_name like 'a%' or s_name like 's%');
+List the number of different companies (use of DISTINCT)
+
+sql
+Copy code
+select distinct pcompany_name from placementDrive;
+Give a 15% increase in fee of the Training whose joining year is 2023
+
+sql
+Copy code
+update Training set t_fee=t_fee * 1.15 where t_year=2023;
+Delete Student details with CGPA less than 7
+
+sql
+Copy code
+delete from Student where cgpa<7;
+Find companies located in Pune or Mumbai
+
+sql
+Copy code
+select * from placementDrive where location in('pune','mumbai');
+Find student names who joined training in 2023 or 2024
+
+sql
+Copy code
+select * from Training where t_year between '2023' and '2024';
+Display all Student names with T_id in descending order of fees
+
+sql
+Copy code
+SELECT s.s_name, s.T_id FROM Student s JOIN Training t ON s.T_id = t.T_id ORDER BY t.t_fee DESC;
+Create a Simple View
+
+sql
+Copy code
+create view Studentview as select s_id, s_name, cgpa, s_branch from Student;
+Create an Index
+
+sql
+Copy code
+create index student_index on Student(s_id);
+Create a Composite Index
+
+sql
+Copy code
+create unique index s_index on Student(s_id, s_name);

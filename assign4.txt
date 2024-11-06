@@ -1,0 +1,112 @@
+mysql> CREATE TABLE Borrower (
+    ->     Roll_no INT,
+    ->     Name VARCHAR(255),
+    ->     Date_of_Issue DATE,
+    ->     Name_of_Book VARCHAR(255),
+    ->     Status CHAR(1)
+    -> );
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> CREATE TABLE Fine (
+    ->     Roll_no INT,
+    ->     Date DATE,
+    ->     Amt DECIMAL(10, 2)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+
+DELIMITER //
+
+CREATE PROCEDURE CalculateFine(IN input_roll_no INT, IN input_book_name VARCHAR(255))
+BEGIN
+    DECLARE days_late INT DEFAULT 0;
+    DECLARE fine_amt DECIMAL(10, 2) DEFAULT 0;
+    DECLARE issue_date DATE;
+    DECLARE no_data_found INT DEFAULT 0;
+
+    -- Exception handler for NOT FOUND
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_data_found = 1;
+
+    -- Step 1: Fetch Date_of_Issue
+    SELECT Date_of_Issue INTO issue_date
+    FROM Borrower
+    WHERE Roll_no = input_roll_no AND Name_of_Book = input_book_name;
+
+    -- Step 2: Check if record not found
+    IF no_data_found = 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Record not found';
+    ELSE
+        -- Step 3: Calculate days late and fine
+        SET days_late = DATEDIFF(CURDATE(), issue_date);
+
+        IF days_late BETWEEN 15 AND 30 THEN
+            SET fine_amt = days_late * 5;
+        ELSEIF days_late > 30 THEN
+            SET fine_amt = (30 * 5) + ((days_late - 30) * 50);
+        END IF;
+
+        -- Step 4: Update status and insert fine if applicable
+        UPDATE Borrower 
+        SET Status = 'R'
+        WHERE Roll_no = input_roll_no AND Name_of_Book = input_book_name;
+
+        IF fine_amt > 0 THEN
+            INSERT INTO Fine (Roll_no, Date, Amt) VALUES (input_roll_no, CURDATE(), fine_amt);
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+
+INSERT INTO Borrower (Roll_no, Name, Date_of_Issue, Name_of_Book, Status)
+VALUES (1, 'John Doe', '2023-10-01', 'Database Systems', 'I');
+
+CALL CalculateFine(1, 'Database Systems');
+
+
+SELECT * FROM Borrower;
+SELECT * FROM Fine;
+
+
+4B
+mysql> CREATE TABLE areas (
+         radius NUMBER,
+         area NUMBER
+     );
+
+
+DELIMITER //
+
+CREATE PROCEDURE CalculateAreas()
+BEGIN
+    DECLARE r INT DEFAULT 5; -- Start with radius = 5
+    DECLARE calculated_area DECIMAL(10, 2);
+
+    -- Exception handler for SQL errors
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK; -- Undo any changes if an error occurs
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred during area calculation and insertion';
+    END;
+
+    -- Start transaction
+    START TRANSACTION;
+
+    -- Loop through radius values from 5 to 9
+    WHILE r <= 9 DO
+        -- Calculate area using π * r^2
+        SET calculated_area = 3.14159 * r * r;
+
+        -- Insert radius and calculated area into the areas table
+        INSERT INTO areas (radius, area) VALUES (r, calculated_area);
+
+        -- Increment radius by 1 for the next iteration
+        SET r = r + 1;
+    END WHILE;
+
+    -- Commit if no errors occurred
+    COMMIT;
+END //
+
+DELIMITER ;

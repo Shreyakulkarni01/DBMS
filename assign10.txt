@@ -1,0 +1,322 @@
+1. Inserting and Retrieving Documents
+Find All Employees with pretty() Display:
+
+
+db.employees.find().pretty();
+Output:
+
+
+[
+  {
+    "_id": ObjectId("66fe432bd7349d8378964034"),
+    "empid": 1,
+    "name": "aaa",
+    "age": 30,
+    "department": "sales",
+    "salary": 62000,
+    "skills": [
+      { "name": "Java", "rating": 4.2 },
+      { "name": "Python", "rating": 3.8 }
+    ]
+  },
+  {
+    "_id": ObjectId("66fe43f7d7349d8378964035"),
+    "empid": 2,
+    "name": "bbb",
+    "age": 25,
+    "department": "Marketing",
+    "salary": 90000,
+    "skills": [
+      { "name": "SEO", "rating": 4 },
+      { "name": "Content Writing", "rating": 3.5 }
+    ]
+  },
+  {
+    "_id": ObjectId("66fe43f7d7349d8378964036"),
+    "empid": 3,
+    "name": "ccc",
+    "age": 35,
+    "department": "Sales",
+    "salary": 80000,
+    "skills": [
+      { "name": "Negotiation", "rating": 4.5 },
+      { "name": "CRM", "rating": 3.9 }
+    ]
+  },
+  {
+    "_id": ObjectId("66fe43f7d7349d8378964037"),
+    "empid": 4,
+    "name": "ddd",
+    "age": 27,
+    "department": "HR",
+    "salary": 60000,
+    "skills": [
+      { "name": "Recruitment", "rating": 4.3 },
+      { "name": "Employee Relations", "rating": 4.1 }
+    ]
+  }
+]
+2. Creating Indexes
+Create Index on Department:
+js
+Copy code
+db.employees.createIndex({ department: 1 });
+Create Index on Salary in Descending Order:
+js
+Copy code
+db.employees.createIndex({ salary: -1 });
+3. Aggregation Queries
+Calculate Average Salary by Department: Group employees by department and calculate the average salary, then sort by average salary in descending order.
+
+
+db.employees.aggregate([
+  {
+    $group: {
+      _id: "$department",
+      averageSalary: { $avg: "$salary" }
+    }
+  },
+  {
+    $sort: { averageSalary: -1 }
+  }
+]);
+Output:
+
+json
+Copy code
+[
+  { "_id": "Marketing", "averageSalary": 90000 },
+  { "_id": "Sales", "averageSalary": 80000 },
+  { "_id": "sales", "averageSalary": 62000 },
+  { "_id": "HR", "averageSalary": 60000 }
+]
+Find Employees with Skills Rating Greater Than 4.0: Unwind the skills array, filter by rating, and project specific fields.
+
+
+db.employees.aggregate([
+  { $match: { "skills.rating": { $gt: 4.0 } } },
+  { $unwind: "$skills" },
+  { $match: { "skills.rating": { $gt: 4.0 } } },
+  {
+    $project: {
+      name: 1,
+      department: 1,
+      skillName: "$skills.name",
+      skillRating: "$skills.rating"
+    }
+  }
+]);
+Output:
+
+
+[
+  {
+    "_id": ObjectId("66fe432bd7349d8378964034"),
+    "name": "aaa",
+    "department": "sales",
+    "skillName": "Java",
+    "skillRating": 4.2
+  },
+  {
+    "_id": ObjectId("66fe43f7d7349d8378964036"),
+    "name": "ccc",
+    "department": "Sales",
+    "skillName": "Negotiation",
+    "skillRating": 4.5
+  },
+  {
+    "_id": ObjectId("66fe43f7d7349d8378964037"),
+    "name": "ddd",
+    "department": "HR",
+    "skillName": "Recruitment",
+    "skillRating": 4.3
+  },
+  {
+    "_id": ObjectId("66fe43f7d7349d8378964037"),
+    "name": "ddd",
+    "department": "HR",
+    "skillName": "Employee Relations",
+    "skillRating": 4.1
+  }
+]
+Count Employees by Department: Group employees by department and count the number of employees in each department.
+js
+Copy code
+db.employees.aggregate([
+  {
+    $group: {
+      _id: "$department",
+      count: { $sum: 1 }
+    }
+  }
+]);
+Output:
+
+json
+Copy code
+[
+  { "_id": "Sales", "count": 1 },
+  { "_id": "HR", "count": 1 },
+  { "_id": "sales", "count": 1 },
+  { "_id": "Marketing", "count": 1 }
+]
+Summary
+Indexes: Created indexes on department and salary fields.
+Aggregation: Used aggregation to calculate average salary, filter by skill rating, and count employees by department.
+This document outlines the MongoDB CRUD and aggregation operations for the employees collection, including index creation, grouping, filtering, and array unwinding in the skills field.
+
+
+
+
+
+
+You said:
+usepipelinefunctions
+ChatGPT said:
+ChatGPT
+In MongoDB, the aggregation framework uses a series of pipeline stages that process documents sequentially. Here’s an example of using common pipeline functions ($match, $group, $project, $sort, $unwind, $lookup, and $addFields) in various scenarios.
+
+1. Pipeline Example: Calculate Average Salary by Department and Filter by Minimum Average Salary
+This pipeline will calculate the average salary per department, then filter departments with an average salary above a specific threshold, and finally sort by average salary in descending order.
+
+js
+Copy code
+db.employees.aggregate([
+  { 
+    $group: { 
+      _id: "$department", 
+      averageSalary: { $avg: "$salary" }
+    } 
+  },
+  { 
+    $match: { 
+      averageSalary: { $gt: 60000 }
+    } 
+  },
+  { 
+    $sort: { 
+      averageSalary: -1 
+    } 
+  }
+]);
+2. Pipeline Example: Unwind Skills and Project Specific Fields
+This example will use $unwind to flatten the skills array and then project the name, department, and each individual skill with its rating.
+
+js
+Copy code
+db.employees.aggregate([
+  { 
+    $unwind: "$skills" 
+  },
+  { 
+    $project: { 
+      name: 1, 
+      department: 1, 
+      skillName: "$skills.name", 
+      skillRating: "$skills.rating" 
+    } 
+  }
+]);
+3. Pipeline Example: Count Employees by Department and Add Field for Total Count
+This example groups employees by department, counts the number of employees in each department, and adds a new field to show the total count of all employees.
+
+js
+Copy code
+db.employees.aggregate([
+  { 
+    $group: { 
+      _id: "$department", 
+      employeeCount: { $sum: 1 } 
+    } 
+  },
+  { 
+    $addFields: { 
+      totalEmployees: { $sum: "$employeeCount" } 
+    } 
+  }
+]);
+4. Pipeline Example: Use $lookup to Join Data from Another Collection
+Assuming there's another collection departments with information about each department, we can use $lookup to join the departments collection with employees.
+
+js
+Copy code
+db.employees.aggregate([
+  { 
+    $lookup: {
+      from: "departments",
+      localField: "department",
+      foreignField: "name",
+      as: "departmentDetails"
+    } 
+  },
+  { 
+    $unwind: "$departmentDetails"
+  },
+  { 
+    $project: { 
+      name: 1, 
+      department: 1, 
+      departmentBudget: "$departmentDetails.budget",
+      salary: 1,
+      skills: 1
+    } 
+  }
+]);
+5. Pipeline Example: Filter by Skill Rating Using $match, Then $unwind and $project Specific Fields
+In this pipeline, we first filter employees who have any skill with a rating greater than 4.0, then unwind the skills array, filter by rating again to ensure each skill rating is above 4.0, and project only the relevant fields.
+
+js
+Copy code
+db.employees.aggregate([
+  { 
+    $match: { 
+      "skills.rating": { $gt: 4.0 } 
+    } 
+  },
+  { 
+    $unwind: "$skills" 
+  },
+  { 
+    $match: { 
+      "skills.rating": { $gt: 4.0 } 
+    } 
+  },
+  { 
+    $project: { 
+      name: 1, 
+      department: 1, 
+      skillName: "$skills.name", 
+      skillRating: "$skills.rating" 
+    } 
+  }
+]);
+6. Pipeline Example: Use $addFields to Calculate Net Salary After Tax
+This example demonstrates how to add a calculated field using $addFields. Here, we assume a tax rate of 10% and calculate the net salary for each employee.
+
+js
+Copy code
+db.employees.aggregate([
+  { 
+    $addFields: { 
+      netSalary: { 
+        $subtract: ["$salary", { $multiply: ["$salary", 0.1] }] 
+      }
+    } 
+  },
+  { 
+    $project: { 
+      name: 1, 
+      department: 1, 
+      salary: 1, 
+      netSalary: 1 
+    }
+  }
+]);
+Summary of Pipeline Functions Used
+$match: Filters documents based on specified conditions.
+$group: Groups documents by a specified field and can calculate aggregates like sum, avg, etc.
+$project: Selects specific fields to include in the output.
+$sort: Sorts documents by a specified field.
+$unwind: Deconstructs an array field, creating a document for each element.
+$lookup: Performs a left outer join with another collection.
+$addFields: Adds or modifies fields in documents with calculated values.

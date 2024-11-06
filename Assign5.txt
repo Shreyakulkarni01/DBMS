@@ -1,0 +1,76 @@
+Assignment 5
+Aim: Named PL/SQL Block: PL/SQL Stored Procedure and Stored Function. Write a Stored Procedure named proc_Grade for the categorization of students. If marks scored by students in an examination are:
+
+≤ 1500 and ≥ 990, then the student will be placed in the distinction category.
+Between 989 and 900, the category is first class.
+Between 899 and 825, the category is Higher Second Class.
+Write a PL/SQL block to use the procedure created with the above requirements.
+
+Tables:
+
+Create the Student table:
+
+
+create table Student(rollno int primary key not null, name varchar(20), marks int);
+Insert records into the Student table:
+
+
+insert into Student values(1,"Siddhi",990),(2,"Anushree",1300),(3,"Dhanashree",950), (4,"Jon",720);
+Create the Result table:
+
+
+create table result(rollno int, name varchar(20), class varchar(20));
+Display: Display the content of the Student table.
+
+Code:
+Function
+
+delimiter //
+
+create function assign(stud_marks int)
+returns varchar(20)
+begin
+    declare result varchar(20);
+    case
+        when stud_marks <= 1500 and stud_marks >= 990 then
+            set result = "Distinction";
+        when stud_marks <= 989 and stud_marks >= 900 then
+            set result = "First class";
+        when stud_marks <= 899 and stud_marks >= 825 then
+            set result = "Higher second class";
+        else
+            set result = "No grade";
+    end case;
+    return result;
+end
+//
+
+delimiter ;
+Procedure
+
+delimiter //
+
+create procedure calClass(IN rollno int)
+pro_label:begin
+    declare grade varchar(20);
+    declare stud_name varchar(20);
+    declare stud_marks int;
+    
+    declare exit handler for sqlexception
+    begin
+        select 'An error occurred while processing the request' as error_message;
+    end;
+
+    select name, marks into stud_name, stud_marks from Student where Student.rollno = rollno;
+    
+    if stud_marks < 0 or stud_marks > 1500 then
+        select 'Invalid marks value. Marks must be between 0 and 1500.' as error_message;
+        leave pro_label;
+    end if;
+
+    set grade = assign(stud_marks);
+    insert into result values(rollno, stud_name, grade);
+end
+//
+
+delimiter ;

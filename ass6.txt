@@ -1,0 +1,83 @@
+mysql> create table OldTable (O_e_id int primary key,e_name varchar(20));
+Query OK, 0 rows affected (0.25 sec)
+mysql> create table NewTable (n_e_id int primary key,e_name varchar(20));
+Query OK, 0 rows affected (7.34 sec)
+INSERT INTO OldTable (O_e_id, e_name) VALUES
+ (1, 'Siddhi'),
+ (2, 'Anushree'),
+ (3, 'Shreeja'),
+ (4, 'Dhanashree'),
+ (5, 'Shreya');
+INSERT INTO NewTable (n_e_id, e_name) VALUES
+ (1, 'Siddhi'),
+ (5, 'Shreya');
+
+Procedure : 
+DELIMITER //
+CREATE PROCEDURE cursordemo()
+BEGIN
+ DECLARE done INT DEFAULT FALSE;
+ DECLARE e_id INT;
+ DECLARE name VARCHAR(20);
+ -- Declare a cursor for selecting data from OldTable
+ DECLARE c1 CURSOR FOR
+ SELECT O_e_id, e_name FROM OldTable ;
+ -- Declare a handler for the NOT FOUND condition
+ DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+ -- Open the cursor
+ OPEN c1;
+ -- Start the loop to fetch and process each row
+ read_loop: LOOP
+ FETCH c1 INTO e_id, name;
+ -- Exit the loop if no more rows are found
+ IF done THEN
+ LEAVE read_loop;
+ END IF;
+ -- Insert into NewTable, ignoring duplicates
+ INSERT IGNORE INTO NewTable (n_e_id, e_name) VALUES (e_id, name);
+ END LOOP read_loop;
+ -- Close the cursor
+ CLOSE c1;
+END //
+DELIMITER ;
+
+call curserdemo();
+
+
+procedure parametersied cursor:
+DELIMITER //
+
+CREATE PROCEDURE mycursor(IN p_e_id INT)
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE e_id INT;
+    DECLARE name VARCHAR(20);
+
+    -- Declare a cursor with a parameterized query
+    DECLARE c1 CURSOR FOR
+    SELECT O_e_id, e_name FROM oldTable WHERE O_e_id = p_e_id;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open the cursor
+    OPEN c1;
+
+    read_loop: LOOP
+        -- Fetch data into variables
+        FETCH c1 INTO e_id, name;
+
+        -- Exit loop if no more rows
+        IF done THEN 
+            LEAVE read_loop;
+        END IF;
+
+        -- Insert fetched data into newTable
+        INSERT IGNORE INTO newTable VALUES (e_id, name);
+
+    END LOOP read_loop;
+
+    -- Close the cursor
+    CLOSE c1;
+END //
+
+DELIMITER ;
